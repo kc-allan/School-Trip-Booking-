@@ -1,56 +1,57 @@
 package com.schooltrip.controller;
 
+
+
 import java.io.IOException;
 
 import com.schooltrip.dao.UserDAO;
 import com.schooltrip.model.User;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.annotation.WebServlet;
 
-
+@WebServlet("/register")
 public class UserServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
-    private UserDAO userDAO;
-
-    @Override
-    public void init() {
-        userDAO = new UserDAO(); 
-
+    
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String action = request.getPathInfo();
-        if (action == null || action.equals("/login")) {
-            request.getRequestDispatcher("/WEB-INF/jsp/user/login.jsp").forward(request, response);
-        } else if (action.equals("/register")) {
-            request.getRequestDispatcher("/WEB-INF/jsp/user/register.jsp").forward(request, response);
-        }
+        // Forward to registration page
+        request.getRequestDispatcher("/WEB-INF/views/users/register.jsp").forward(request, response);
     }
-
+    
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String action = request.getPathInfo();
-        if (action.equals("/register")) {
-            String name = request.getParameter("name");
-            String email = request.getParameter("email");
-            String password = request.getParameter("password");
-
-            User user = new User();
-            userDAO.saveUser(user);  // Save to database
-            response.sendRedirect(request.getContextPath() + "/users/login");
-        } else if (action.equals("/login")) {
-            String email = request.getParameter("email");
-            String password = request.getParameter("password");
-
-            User user = userDAO.authenticate(email, password);
-            if (user != null) {
-                request.getSession().setAttribute("user", user);
-                response.sendRedirect(request.getContextPath() + "/dashboard");
-            } else {
-                request.setAttribute("errorMessage", "Invalid Credentials!");
-                request.getRequestDispatcher("/WEB-INF/jsp/user/login.jsp").forward(request, response);
-            }
+        // Get form parameters
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        String email = request.getParameter("email");
+        String fullName = request.getParameter("fullName");
+        String role = request.getParameter("role");
+        int departmentId = Integer.parseInt(request.getParameter("departmentId"));
+        
+        // Create user object
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(password); 
+        user.setEmail(email);
+        user.setFullName(fullName);
+        user.setRole(role);
+        user.setDepartmentId(departmentId);
+        
+        // Register user
+        UserDAO userDAO = new UserDAO();
+        boolean registered = userDAO.registerUser(user);
+        
+        if (registered) {
+            // Registration successful, redirect to login page
+            response.sendRedirect(request.getContextPath() + "/login");
+        } else {
+            // Registration failed, set error message
+            request.setAttribute("errorMessage", "Registration failed. Please try again.");
+            request.getRequestDispatcher("/WEB-INF/views/users/register.jsp").forward(request, response);
         }
     }
 }
+

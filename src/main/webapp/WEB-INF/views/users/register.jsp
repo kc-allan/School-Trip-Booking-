@@ -21,11 +21,7 @@
         </c:if>
         
         <form action="${pageContext.request.contextPath}/register" method="post">
-            <div class="form-group">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            
+                       
             <div class="form-group">
                 <label for="password">Password:</label>
                 <input type="password" id="password" name="password" required>
@@ -44,9 +40,8 @@
             <div class="form-group">
                 <label for="role">Role:</label>
                 <select id="role" name="role" required>
-                    <option value="student">Student</option>
-                    <option value="teacher">Teacher</option>
-                    <option value="admin">Admin</option>
+                    <option value="cod">COD</option>
+                    <option value="admin">ADMIN</option>
                 </select>
             </div>
             
