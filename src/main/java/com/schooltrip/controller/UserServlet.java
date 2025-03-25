@@ -7,11 +7,11 @@ import java.io.IOException;
 import com.schooltrip.dao.UserDAO;
 import com.schooltrip.model.User;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.annotation.WebServlet;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.annotation.WebServlet;
 
 @WebServlet("/register")
 public class UserServlet extends HttpServlet {
