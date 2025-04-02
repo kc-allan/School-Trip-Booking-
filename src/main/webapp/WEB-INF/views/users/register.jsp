@@ -24,23 +24,25 @@
                 <i class="fas fa-exclamation-circle"></i> ${errorMessage}
             </div>
         </c:if>
-
-        <form action="${pageContext.request.contextPath}/register" method="post">
-            <div class="form-group">
-                <label for="fullName"><i class="fas fa-user"></i> Full Name</label>
-                <input type="text" id="fullName" name="fullName" required placeholder="Enter your full name">
-            </div>
-
+        
+        <form action="${pageContext.request.contextPath}/register" method="post">   
+        
+        <div class="form-group">
+                <label for="fullName">Full Name:</label>
+                <input type="text" id="fullName" name="fullName" required>
+            </div>               
+                       
             <div class="form-group">
                 <label for="email"><i class="fas fa-envelope"></i> Email</label>
                 <input type="email" id="email" name="email" required placeholder="Enter your email address">
             </div>
-
-            <div class="form-group">
-                <label for="password"><i class="fas fa-lock"></i> Password</label>
-                <input type="password" id="password" name="password" required placeholder="Create a password">
+            
+             <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
             </div>
-
+                       
+            
             <div class="form-group">
                 <label for="role"><i class="fas fa-user-tag"></i> Role</label>
                 <select id="role" name="role" required>
