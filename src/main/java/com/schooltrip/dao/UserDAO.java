@@ -8,16 +8,17 @@ import com.schooltrip.util.PasswordHashUtil;
 
 public class UserDAO {
     public boolean registerUser(User user, String password) throws Exception {
-        String sql = "INSERT INTO users (full_name, email, password, role, department_id) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users (full_name, email, username, password, role, department_id) VALUES (?, ?, ?, ?, ?, ?)";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             
             pstmt.setString(1, user.getFullName());
             pstmt.setString(2, user.getEmail());
-            pstmt.setString(3, PasswordHashUtil.hashPassword(password));
-            pstmt.setString(4, user.getRole());
-            pstmt.setInt(5, user.getDepartmentId());
+            pstmt.setString(3, user.getUsername());
+            pstmt.setString(4, PasswordHashUtil.hashPassword(password));
+            pstmt.setString(5, user.getRole());
+            pstmt.setInt(6, user.getDepartmentId());
 
             int affectedRows = pstmt.executeUpdate();
             return affectedRows > 0;

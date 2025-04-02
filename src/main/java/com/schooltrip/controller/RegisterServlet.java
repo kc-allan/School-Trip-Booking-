@@ -1,16 +1,20 @@
 package com.schooltrip.controller;
 
 import java.io.IOException;
+import java.util.List;
 
 import com.schooltrip.dao.UserDAO;
+import com.schooltrip.model.Department;
 import com.schooltrip.model.User;
+import com.schooltrip.service.DepartmentService;
+import com.schooltrip.util.DBConnection;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 @WebServlet("/register")
 public class RegisterServlet extends HttpServlet {
@@ -22,6 +26,16 @@ public class RegisterServlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
+                // Get list of departments for the dropdown
+        try {
+            DepartmentService departmentService = new DepartmentService();
+            List<Department> departments = departmentService.getAllDepartments();
+            request.setAttribute("departments", departments);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("errorMessage", "An error occurred while fetching departments");
+        }
         request.getRequestDispatcher("/WEB-INF/views/users/register.jsp").forward(request, response);
     }
 
@@ -29,11 +43,12 @@ public class RegisterServlet extends HttpServlet {
             throws ServletException, IOException {
         String fullName = request.getParameter("fullName");
         String email = request.getParameter("email");
+        String username = email.split(email.split("@")[0])[0];
         String password = request.getParameter("password");
         String role = request.getParameter("role");
         int departmentId = Integer.parseInt(request.getParameter("departmentId"));
 
-        User user = new User(fullName, email, role, departmentId);
+        User user = new User(fullName, email, username, role, departmentId);
 
         try {
             // Check if email already exists
