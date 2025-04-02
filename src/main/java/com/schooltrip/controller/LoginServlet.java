@@ -21,21 +21,21 @@ public class LoginServlet extends HttpServlet {
     }
     
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String username = request.getParameter("username");
+        String email = request.getParameter("email");
         String password = request.getParameter("password");
         
         UserDAO userDAO = new UserDAO();
         
-        if (userDAO.validateUser(username, password)) {
+        if (userDAO.validateUser(email, password)) {
             // Valid login, get user details
-            User user = userDAO.getUserByUsername(username);
+            User user = userDAO.getUserByUsername(email);
             
             // Store user in session
             HttpSession session = request.getSession();
             session.setAttribute("user", user);
             
             // Redirect to home page
-            response.sendRedirect(request.getContextPath() + "/index.jsp");
+            response.sendRedirect(request.getContextPath() + "/dashboard.jsp");
         } else {
             // Invalid login, set error message
             request.setAttribute("errorMessage", "Invalid username or password");
