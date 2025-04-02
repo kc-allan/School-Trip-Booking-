@@ -1,91 +1,71 @@
 package com.schooltrip.dao;
 
-
-
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.Optional;
 
 import com.schooltrip.model.User;
-import com.schooltrip.util.DBConnection;
-
+import com.schooltrip.util.PasswordHashUtil;
 
 public class UserDAO {
-    
-    public boolean registerUser(User user) {
-        String sql = "INSERT INTO users (username, password, email, full_name, role, department_id) VALUES (?, ?, ?, ?, ?, ?)";
-        Connection conn = null;
+    public boolean registerUser(User user, String password) throws Exception {
+        String sql = "INSERT INTO users (full_name, email, password, role, department_id) VALUES (?, ?, ?, ?, ?)";
         
-        try {
-            conn = DBConnection.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, user.getUsername());
-            ps.setString(2, user.getPassword()); 
-            ps.setString(3, user.getEmail());
-            ps.setString(4, user.getFullName());
-            ps.setString(5, user.getRole());
-            ps.setInt(6, user.getDepartmentId());
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             
-            int rowsAffected = ps.executeUpdate();
-            return rowsAffected > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        } finally {
-            DBConnection.closeConnection(conn);
+            pstmt.setString(1, user.getFullName());
+            pstmt.setString(2, user.getEmail());
+            pstmt.setString(3, PasswordHashUtil.hashPassword(password));
+            pstmt.setString(4, user.getRole());
+            pstmt.setInt(5, user.getDepartmentId());
+
+            int affectedRows = pstmt.executeUpdate();
+            return affectedRows > 0;
         }
     }
-    
-    public User getUserByUsername(String username) {
-        String sql = "SELECT * FROM users WHERE username = ?";
-        Connection conn = null;
-        User user = null;
+
+    public Optional<User> authenticateUser(String email, String password) throws Exception {
+        String sql = "SELECT * FROM users WHERE email = ?";
         
-        try {
-            conn = DBConnection.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, username);
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                user = new User();
-                user.setId(rs.getInt("id"));
-                user.setUsername(rs.getString("username"));
-                user.setPassword(rs.getString("password"));
-                user.setEmail(rs.getString("email"));
-                user.setFullName(rs.getString("full_name"));
-                user.setRole(rs.getString("role"));
-                user.setDepartmentId(rs.getInt("department_id"));
+            pstmt.setString(1, email);
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    String storedPassword = rs.getString("password");
+                    
+                    if (PasswordHashUtil.verifyPassword(password, storedPassword)) {
+                        User user = new User();
+                        user.setUserId(rs.getInt("user_id"));
+                        user.setFullName(rs.getString("full_name"));
+                        user.setEmail(rs.getString("email"));
+                        user.setRole(rs.getString("role"));
+                        user.setDepartmentId(rs.getInt("department_id"));
+                        
+                        return Optional.of(user);
+                    }
+                }
             }
-            return user;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        } finally {
-            DBConnection.closeConnection(conn);
         }
+        return Optional.empty();
     }
-    
-    public boolean validateUser(String username, String password) {
-        String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
-        Connection conn = null;
+
+    public boolean emailExists(String email) throws Exception {
+        String sql = "SELECT COUNT(*) FROM users WHERE email = ?";
         
-        try {
-            conn = DBConnection.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, username);
-            ps.setString(2, password); 
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            ResultSet rs = ps.executeQuery();
-            return rs.next(); 
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        } finally {
-            DBConnection.closeConnection(conn);
+            pstmt.setString(1, email);
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
         }
+        return false;
     }
 }
-
